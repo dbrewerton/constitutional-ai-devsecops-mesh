@@ -1,0 +1,41 @@
+name: Finding Validator
+
+on:
+  push:
+    paths:
+      - "schemas/**"
+      - "scripts/validate-findings.py"
+      - "scripts/test-finding-validator.ps1"
+      - "tests/fixtures/findings/**"
+      - "validator/**"
+      - "docker-compose.yml"
+      - ".github/workflows/finding-validator.yml"
+
+  pull_request:
+    paths:
+      - "schemas/**"
+      - "scripts/validate-findings.py"
+      - "scripts/test-finding-validator.ps1"
+      - "tests/fixtures/findings/**"
+      - "validator/**"
+      - "docker-compose.yml"
+      - ".github/workflows/finding-validator.yml"
+
+jobs:
+  validate-findings:
+    name: Validate Finding Contract
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build validator container
+        shell: pwsh
+        run: |
+          docker compose --profile tools build finding-validator
+
+      - name: Run validator contract tests
+        shell: pwsh
+        run: |
+          .\scripts\test-finding-validator.ps1
