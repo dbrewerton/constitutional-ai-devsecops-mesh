@@ -1,18 +1,27 @@
-# Local Workspace Data (Simulated codebase artifacts)
-workspace/
-!workspace/.gitkeep
-
-# Local Model Weights (Prevent pushing gigabytes of Ollama layers)
+# === AI Model Weights & Cache ===
+# Prevents pushing gigabytes of local Ollama layers to GitHub
 ollama-data/
 .ollama/
 
-# Python Virtual Environments & Caches
+# === Local Codebase Workspaces ===
+# Prevents leaking your private test code artifacts or scan repositories
+workspace/
+!workspace/.gitkeep
+
+# === Python Environment & Compilation ===
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
 .venv/
-.env
+pip-log.txt
+pip-delete-this-directory.txt
 
-# IDE / Host Specific Configs
-.idea/
+# === IDE & OS Metadata ===
 .vscode/
+.idea/
 .DS_Store
+Thumbs.db
