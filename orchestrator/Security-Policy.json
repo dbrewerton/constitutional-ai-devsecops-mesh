@@ -1,0 +1,11 @@
+{
+  "system_policy_version": "2026.1.0",
+  "sca_policy": {
+    "fail_on_cve_severity": ["CRITICAL", "HIGH"],
+    "allowed_licenses": ["MIT", "Apache-2.0", "BSD-3-Clause"],
+    "banned_licenses": ["GPL-3.0", "AGPL-3.0"]
+  },
+  "sast_policy": {
+    "disallowed_patterns": ["exec\\(", "eval\\(", "password\\s*=\\s*['\"][^'\"]+['\"]"]
+  }
+}

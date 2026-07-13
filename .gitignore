@@ -1,0 +1,18 @@
+# Local Workspace Data (Simulated codebase artifacts)
+workspace/
+!workspace/.gitkeep
+
+# Local Model Weights (Prevent pushing gigabytes of Ollama layers)
+ollama-data/
+.ollama/
+
+# Python Virtual Environments & Caches
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# IDE / Host Specific Configs
+.idea/
+.vscode/
+.DS_Store
