@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lighthouse.local/schemas/finding.schema.json",
+  "title": "Constitutional AI DevSecOps Finding",
+  "description": "Canonical contract for findings produced by agents in the Constitutional AI DevSecOps Mesh.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "description",
+    "source_agent",
+    "category",
+    "severity",
+    "confidence",
+    "evidence",
+    "sources",
+    "constitutional_checks",
+    "real_assessment",
+    "status",
+    "recommendation",
+    "created_at"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:-]+$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_agent": {
+      "type": "string",
+      "enum": [
+        "sast",
+        "sca",
+        "secrets",
+        "iac",
+        "container",
+        "policy",
+        "evidence",
+        "supervisor"
+      ]
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "vulnerability",
+        "dependency",
+        "secret",
+        "misconfiguration",
+        "policy-violation",
+        "container",
+        "informational"
+      ]
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "critical",
+        "high",
+        "medium",
+        "low",
+        "informational"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "description"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "code",
+              "configuration",
+              "dependency",
+              "scanner-output",
+              "runtime",
+              "manual-review"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "file": {
+            "type": "string"
+          },
+          "line_start": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "line_end": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "fingerprint": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "reference"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "reference": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    "constitutional_checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "principle",
+          "result",
+          "explanation"
+        ],
+        "properties": {
+          "principle": {
+            "type": "string",
+            "minLength": 1
+          },
+          "result": {
+            "type": "string",
+            "enum": [
+              "pass",
+              "fail",
+              "not-applicable"
+            ]
+          },
+          "explanation": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "real_assessment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reality_based",
+        "evidence_backed",
+        "actionable",
+        "linked",
+        "score"
+      ],
+      "properties": {
+        "reality_based": {
+          "type": "boolean"
+        },
+        "evidence_backed": {
+          "type": "boolean"
+        },
+        "actionable": {
+          "type": "boolean"
+        },
+        "linked": {
+          "type": "boolean"
+        },
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "candidate",
+        "validated",
+        "rejected",
+        "accepted-risk",
+        "remediated"
+      ]
+    },
+    "recommendation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

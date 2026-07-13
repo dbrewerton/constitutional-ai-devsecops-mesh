@@ -1,0 +1,288 @@
+version: "0.1.0"
+status: "draft"
+constitution_reference: "docs/CONSTITUTION.md"
+
+metadata:
+  name: "Constitutional AI DevSecOps Mesh Policy"
+  document_type: "machine-readable constitutional policy"
+  authority: "project constitution"
+  schema_version: "0.1.0"
+
+governance:
+  constitution_is_highest_authority: true
+  evidence_required: true
+  ai_output_is_evidence: false
+  human_final_authority: true
+  skeptical_acceptance_required: true
+  silent_policy_bypass_forbidden: true
+  unsupported_certainty_forbidden: true
+  unresolved_disagreement_must_be_visible: true
+  consequential_actions_fail_closed: true
+
+scope:
+  local_first: true
+  kubernetes_required: false
+  cloud_required: false
+
+  permitted:
+    - "inspect_authorized_repositories"
+    - "run_isolated_security_tools"
+    - "normalize_findings"
+    - "validate_evidence"
+    - "evaluate_policy"
+    - "produce_reports"
+    - "preserve_audit_records"
+    - "recommend_remediation"
+
+  prohibited_without_human_approval:
+    - "modify_source_code"
+    - "modify_infrastructure"
+    - "deploy_software"
+    - "perform_destructive_actions"
+    - "suppress_verified_findings"
+    - "accept_constitutional_exceptions"
+
+real_framework:
+  required: true
+
+  real:
+    description: "Confirm that the reported condition exists in the authorized target."
+    required_checks:
+      - "target_exists"
+      - "artifact_exists"
+      - "artifact_is_in_scope"
+      - "reported_location_is_relevant"
+
+  evidence:
+    description: "Identify verifiable artifacts supporting the claim."
+    required_checks:
+      - "evidence_present"
+      - "evidence_origin_recorded"
+      - "evidence_distinguished_from_interpretation"
+      - "evidence_integrity_recorded_when_practical"
+
+  auditable:
+    description: "Preserve enough provenance for independent review."
+    required_checks:
+      - "tool_identity_recorded"
+      - "tool_version_recorded"
+      - "policy_version_recorded"
+      - "target_revision_recorded"
+      - "decision_path_recorded"
+      - "timestamps_recorded"
+
+  logical:
+    description: "Ensure the conclusion follows from the evidence."
+    required_checks:
+      - "severity_supported"
+      - "confidence_supported"
+      - "impact_supported"
+      - "recommendation_supported"
+      - "unsupported_inference_absent"
+
+confidence:
+  minimum: 0.0
+  maximum: 1.0
+  derivation_required: true
+
+  classifications:
+    insufficient_evidence:
+      minimum: 0.0
+      maximum: 0.39
+
+    tentative:
+      minimum: 0.40
+      maximum: 0.69
+
+    supported:
+      minimum: 0.70
+      maximum: 0.89
+
+    verified:
+      minimum: 0.90
+      maximum: 1.0
+
+  reduction_conditions:
+    - "required_evidence_missing"
+    - "tools_disagree"
+    - "reproduction_failed"
+    - "target_not_confirmed"
+    - "rule_applicability_uncertain"
+    - "unsupported_inference_required"
+
+agent_controls:
+  identity_required: true
+  declared_capability_required: true
+  approved_schema_required: true
+  least_privilege_required: true
+  resource_limits_required: true
+  uncertainty_reporting_required: true
+  provenance_required: true
+
+  must:
+    - "accept_only_authorized_work"
+    - "operate_within_declared_capability"
+    - "distinguish_fact_evidence_interpretation_recommendation"
+    - "report_errors_and_limitations"
+    - "preserve_relevant_provenance"
+    - "respect_execution_limits"
+
+  must_not:
+    - "fabricate_evidence"
+    - "fabricate_sources"
+    - "fabricate_confidence"
+    - "conceal_failed_checks"
+    - "conceal_disagreement"
+    - "act_outside_scope"
+    - "bypass_human_approval"
+    - "claim_unsupported_certainty"
+    - "suppress_findings_for_appearance"
+
+  may:
+    - "request_additional_evidence"
+    - "challenge_another_agent"
+    - "downgrade_confidence"
+    - "escalate_disagreement"
+    - "refuse_unsafe_work"
+    - "refuse_unconstitutional_work"
+
+decision_lifecycle:
+  required_stages:
+    - "authorized_intent"
+    - "scope_establishment"
+    - "evidence_collection"
+    - "finding_normalization"
+    - "evidence_validation"
+    - "real_evaluation"
+    - "policy_evaluation"
+    - "disagreement_recording"
+    - "decision_or_recommendation"
+    - "human_review_when_required"
+    - "report_generation"
+    - "audit_preservation"
+
+  allow_return_to_prior_stage: true
+  unresolved_state_is_valid: true
+  fabricated_consensus_forbidden: true
+
+human_review:
+  required_for:
+    - "source_code_modification"
+    - "infrastructure_modification"
+    - "deployment"
+    - "destructive_action"
+    - "constitutional_exception"
+    - "suppression_of_verified_finding"
+    - "consequential_unresolved_disagreement"
+    - "policy_designated_action"
+
+  approval_record_requires:
+    - "decision_id"
+    - "approver_identity"
+    - "timestamp"
+    - "scope"
+    - "conditions"
+
+security_boundaries:
+  repository_mount_read_only_preferred: true
+  non_root_execution_required: true
+  drop_linux_capabilities: true
+  explicit_network_access_required: true
+  resource_limits_required: true
+  temporary_working_storage_preferred: true
+  unrestricted_host_filesystem_forbidden: true
+  unrestricted_container_socket_forbidden: true
+  versioned_tool_images_preferred: true
+  integrity_controlled_images_preferred: true
+
+privacy:
+  data_minimization_required: true
+  unnecessary_secret_repetition_forbidden: true
+  report_redaction_required_when_practical: true
+  prompt_secret_exposure_forbidden: true
+  sensitive_log_exposure_forbidden: true
+
+constitutional_violations:
+  stop_consequential_workflow: true
+  record_violation: true
+  surface_for_human_review: true
+
+  examples:
+    - "finding_accepted_without_required_evidence"
+    - "ai_output_presented_as_evidence"
+    - "confidence_fabricated_or_inflated"
+    - "uncertainty_hidden"
+    - "tool_disagreement_hidden"
+    - "authorized_scope_exceeded"
+    - "human_approval_bypassed"
+    - "audit_information_suppressed"
+    - "unauthorized_modification_performed"
+    - "execution_failure_concealed"
+    - "undocumented_exception_applied"
+    - "least_privilege_violated"
+
+exceptions:
+  human_approval_required: true
+  must_be_specific: true
+  must_be_auditable: true
+  time_bounded_preferred: true
+
+  required_fields:
+    - "rule"
+    - "reason"
+    - "scope"
+    - "approver"
+    - "approval_timestamp"
+    - "expiration_or_review_condition"
+    - "compensating_controls"
+    - "associated_risks"
+
+reporting:
+  technical_report_required: true
+  plain_language_report_required: true
+  uncertainty_must_be_visible: true
+  evidence_must_be_distinguishable: true
+  interpretation_must_be_distinguishable: true
+
+  required_sections:
+    - "raw_evidence"
+    - "normalized_findings"
+    - "validation_results"
+    - "policy_results"
+    - "confidence"
+    - "severity"
+    - "recommendations"
+    - "human_decisions"
+    - "remaining_uncertainty"
+
+audit:
+  required: true
+  immutable_preferred: true
+
+  required_fields:
+    - "scan_id"
+    - "decision_id"
+    - "target"
+    - "target_revision"
+    - "tool_identity"
+    - "tool_version"
+    - "policy_version"
+    - "evidence_references"
+    - "validation_results"
+    - "decision_state"
+    - "confidence"
+    - "timestamps"
+    - "human_approval_state"
+
+change_governance:
+  explicit_proposal_required: true
+  security_review_required: true
+  operational_review_required: true
+  version_control_required: true
+  rationale_required: true
+  human_approval_required: true
+
+  semantic_versioning:
+    major: "breaking constitutional change"
+    minor: "material compatible governance change"
+    patch: "correction without change in meaning"

@@ -1,14 +1,4 @@
 services:
-  # Validation Step
-  finding-validator:
-    build:
-      context: .
-      dockerfile: validator/Dockerfile
-    working_dir: /workspace
-    volumes:
-      - ./:/workspace:ro
-    profiles:
-      - tools
   # Local Model Server
   ollama-server:
     image: ollama/ollama:latest
@@ -23,16 +13,16 @@ services:
       - secure-agent-mesh
       - internet-ingress
 
-  # Standalone HTTP Voice Synthesis Engine (Official Developer Multi-Port Layout)
+  # Standalone HTTP Voice Synthesis Engine (Piper HTTP Wrapper Mode)
   piper-server:
     image: rhasspy/wyoming-piper:latest
     container_name: piper-core
     volumes:
       - ./workspace:/data
     ports:
-      - "10200:10200" # Wyoming Protocol Pipeline
-      - "5000:5000"   # Standalone HTTP Web API Endpoint
-    command: --voice en_US-lessac-medium --data-dir /data --download-dir /data/voices
+      - "10200:10200"
+    # Command configures the built-in HTTP web server mapping directly
+    command: --voice en_US-lessac-medium --uri http://0.0.0 --data-dir /data --download-dir /data/voices
     networks:
       - secure-agent-mesh
       - internet-ingress
@@ -50,7 +40,7 @@ services:
       - ./workspace:/app/workspace
     environment:
       - OLLAMA_HOST=http://ollama-server:11434
-      - PIPER_HOST=http://piper-server:5000 # Aligned to talk straight to Piper's HTTP port
+      - PIPER_HOST=http://piper-server:10200
     depends_on:
       - ollama-server
       - piper-server

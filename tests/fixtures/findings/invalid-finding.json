@@ -1,0 +1,9 @@
+{
+  "schema_version": "1.0.0",
+  "id": "BROKEN-0001",
+  "title": "Unsupported claim",
+  "source_agent": "unknown-agent",
+  "category": "vulnerability",
+  "severity": "catastrophic",
+  "confidence": 4.7
+}
