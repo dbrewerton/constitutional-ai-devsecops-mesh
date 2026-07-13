@@ -1,20 +1,4 @@
-networks:
-  # Strictly air-gapped internal mesh for the agents
-  secure-agent-mesh:
-    driver: bridge
-    internal: true
-  # Temporary ingress bridge for initial model pulls
-  internet-ingress:
-    driver: bridge
-  # Public entry port for your host machine web browser / UI
-  public-ingress:
-    driver: bridge
-
-volumes:
-  ollama-data:
-
 services:
-  # Local Model Server
   ollama-server:
     image: ollama/ollama:latest
     container_name: ollama-core
@@ -26,9 +10,21 @@ services:
       - OLLAMA_NUM_PARALLEL=4
     networks:
       - secure-agent-mesh
-      - internet-ingress  # Allows initial model downloads
+      - internet-ingress
 
-  # The Air-Gapped Multi-Agent Orchestrator
+  # High-Efficiency, Air-Gapped Local Speech Synthesis Service
+  piper-server:
+    image: linuxserver/piper:latest
+    container_name: piper-core
+    volumes:
+      - piper-data:/config
+    ports:
+      - "5000:5000"
+    command: --voice en_US-lessac-medium
+    networks:
+      - secure-agent-mesh
+      - internet-ingress
+
   agent-orchestrator:
     build:
       context: ./orchestrator
@@ -38,10 +34,26 @@ services:
       - "8000:8000"
     volumes:
       - ./manifest:/app/manifest:ro
+      - ./workspace:/app/workspace
     environment:
       - OLLAMA_HOST=http://ollama-server:11434
+      - PIPER_HOST=http://piper-server:5000
     depends_on:
       - ollama-server
+      - piper-server
     networks:
-      - secure-agent-mesh # Can talk to Ollama, but has ZERO internet access
-      - public-ingress     # Exposed safely only to your local host browser
+      - secure-agent-mesh
+      - public-ingress
+
+networks:
+  secure-agent-mesh:
+    driver: bridge
+    internal: true
+  internet-ingress:
+    driver: bridge
+  public-ingress:
+    driver: bridge
+
+volumes:
+  ollama-data:
+  piper-data:

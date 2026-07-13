@@ -9,7 +9,20 @@ from schemas import EvaluationRequest, ArbitrationResult
 app = FastAPI(title="Constitutional AI Multi-Agent Mesh")
 
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
+PIPER_HOST = os.getenv("PIPER_HOST", "http://piper-server:5000")
 MANIFEST_PATH = "/app/manifest/security-policy.json"
+
+async def dispatch_speech_generation(text_to_speak: str, output_filename: str):
+    """Dispatches raw string data into the internal Piper TTS microservice."""
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(f"{PIPER_HOST}/api/tts", params={"text": text_to_speak})
+            if response.status_code == 200:
+                target_audio_path = os.path.join("/app/workspace", f"{output_filename}.wav")
+                with open(target_audio_path, "wb") as audio_file:
+                    audio_file.write(response.content)
+    except Exception as e:
+        print(f"[-] Speech generation bypass encountered: {str(e)}")
 
 @app.post("/arbitrate", response_model=ArbitrationResult)
 async def evaluate_artifact(request: EvaluationRequest):
@@ -54,24 +67,19 @@ async def evaluate_artifact(request: EvaluationRequest):
             )
             raw_response = response.json().get("response", "").strip()
             
-            # Extract JSON block securely
             json_match = re.search(r"(\{.*\})", raw_response, re.DOTALL)
             clean_json_str = json_match.group(1) if json_match else raw_response
             model_data = json.loads(clean_json_str)
 
-            # --- DYNAMIC TRANSFORMATION LAYER ---
-            # Standardize case sensitivity and key mappings dynamically
             def get_case_insensitive(d, key_target, default_val="Unknown"):
                 for k, v in d.items():
                     if k.lower() == key_target.lower():
                         return v
                 return default_val
 
-            # Resolve verdict
             raw_verdict = get_case_insensitive(model_data, "verdict", "REJECTED")
-            
-            # Flatten or format the "why" key if the model generated a nested dictionary
             raw_why = get_case_insensitive(model_data, "why")
+            
             if not raw_why or raw_why == "Unknown":
                 rationale_obj = get_case_insensitive(model_data, "decision_rationale", {})
                 raw_why = get_case_insensitive(rationale_obj, "why", "Policy evaluation completed.")
@@ -79,7 +87,6 @@ async def evaluate_artifact(request: EvaluationRequest):
             if isinstance(raw_why, dict) or isinstance(raw_why, list):
                 raw_why = json.dumps(raw_why)
 
-            # Build standardized rationale object
             rationale_obj = get_case_insensitive(model_data, "decision_rationale", model_data)
             normalized_rationale = {
                 "who": str(get_case_insensitive(rationale_obj, "who", get_case_insensitive(model_data, "who", "DOCUMENTATION_ARBITER"))),
@@ -89,7 +96,6 @@ async def evaluate_artifact(request: EvaluationRequest):
                 "why": str(raw_why)
             }
 
-            # Build standardized execution log item
             raw_log = get_case_insensitive(model_data, "execution_trace_log", [])
             if not raw_log or len(raw_log) == 0:
                 raw_log = [{
@@ -100,7 +106,6 @@ async def evaluate_artifact(request: EvaluationRequest):
                     "evidence": f"Model completed scan with reasoning output: {raw_why[:100]}"
                 }]
 
-            # Construct finalized data contract mapping cleanly to schemas.py
             finalized_output = {
                 "verdict": "REJECTED" if "REJECT" in str(raw_verdict).upper() else "APPROVED",
                 "arbitration_timestamp": datetime.now(timezone.utc).isoformat(),
@@ -109,10 +114,13 @@ async def evaluate_artifact(request: EvaluationRequest):
                 "execution_trace_log": raw_log
             }
 
+            # --- LOCAL SPEECH DISPATCH TRIGGER ---
+            speech_text = finalized_output["decision_rationale"]["what"]
+            await dispatch_speech_generation(speech_text, request.artifact_name)
+
             return finalized_output
 
         except Exception as e:
-            # Safe Fallback to guarantee a clean payload is returned instead of an internal crash
             return {
                 "verdict": "REJECTED",
                 "arbitration_timestamp": datetime.now(timezone.utc).isoformat(),
