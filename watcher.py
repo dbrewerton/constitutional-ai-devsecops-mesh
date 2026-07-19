@@ -9,8 +9,31 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 ROOT_DIR = Path(__file__).resolve().parent
-WORKSPACE_PATH = ROOT_DIR / "workspace"
+WORKSPACE_PATH = (ROOT_DIR / "workspace").resolve()
 API_URL = "http://localhost:8000/arbitrate"
+
+
+def open_workspace_file(path: Path, mode: str):
+    """Open a workspace file without following a final-component symlink."""
+    flags_by_mode = {
+        "r": os.O_RDONLY,
+        "w": os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
+    }
+    flags = flags_by_mode[mode] | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags, 0o600)
+    return os.fdopen(descriptor, mode, encoding="utf-8", errors="ignore" if mode == "r" else None)
+
+
+def resolve_workspace_input(source_path: Path) -> Path:
+    """Resolve an event path and require a regular, non-symlink workspace child."""
+    if source_path.is_symlink():
+        raise ValueError("Symbolic links are not accepted.")
+
+    resolved = source_path.resolve(strict=True)
+    resolved.relative_to(WORKSPACE_PATH)
+    if resolved.parent != WORKSPACE_PATH or not resolved.is_file():
+        raise ValueError("Event path is not a direct workspace file.")
+    return resolved
 
 # Initialize native OS-level voice synthesis handles automatically
 if sys.platform == "win32":
@@ -43,7 +66,12 @@ class UltraLowLatencyHandler(FileSystemEventHandler):
     def process_file(self, event):
         if event.is_directory:
             return
-        file_path = Path(event.src_path)
+        source_path = Path(event.src_path)
+        try:
+            file_path = resolve_workspace_input(source_path)
+        except (OSError, RuntimeError, ValueError):
+            return
+
         if file_path.suffix in [".json", ".wav", ".mp4"] or ".audit" in file_path.name:
             return
 
@@ -54,7 +82,7 @@ class UltraLowLatencyHandler(FileSystemEventHandler):
             return
 
         try:
-            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with open_workspace_file(file_path, "r") as f:
                 content = f.read()
             if not content.strip():
                 return
@@ -88,7 +116,9 @@ class UltraLowLatencyHandler(FileSystemEventHandler):
             if response.status_code == 200:
                 audit_log = response.json()
                 audit_output_path = file_path.with_name(f"{file_name}.audit.json")
-                with open(audit_output_path, "w", encoding="utf-8") as out:
+                if audit_output_path.parent != WORKSPACE_PATH:
+                    raise ValueError("Audit output path escapes the workspace.")
+                with open_workspace_file(audit_output_path, "w") as out:
                     json.dump(audit_log, out, indent=2)
                     
                 verdict = audit_log.get("verdict", "UNKNOWN")

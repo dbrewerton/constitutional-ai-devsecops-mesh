@@ -5,6 +5,7 @@ import re
 import base64
 import subprocess
 from datetime import datetime, timezone
+from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from schemas import EvaluationRequest, ArbitrationResult
 
@@ -12,11 +13,37 @@ app = FastAPI(title="Constitutional AI Multi-Agent Mesh")
 
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://localhost:11434")
 MANIFEST_PATH = "/app/manifest/security-policy.json"
+WORKSPACE_PATH = Path("/app/workspace").resolve()
+SAFE_ARTIFACT_NAME = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+
+
+def artifact_audio_path(artifact_name: str) -> Path:
+    """Return a direct-child workspace path for a strictly validated artifact name."""
+    if not isinstance(artifact_name, str) or not SAFE_ARTIFACT_NAME.fullmatch(artifact_name):
+        raise ValueError("Artifact name contains unsupported characters.")
+    if artifact_name in {".", ".."}:
+        raise ValueError("Artifact name is not valid.")
+
+    candidate = (WORKSPACE_PATH / f"{artifact_name}.wav").resolve()
+    if candidate.parent != WORKSPACE_PATH:
+        raise ValueError("Artifact audio path escapes the workspace.")
+    return candidate
+
+
+def open_audio_file(path: Path, mode: str):
+    """Open a validated audio path without following a final-component symlink."""
+    flags_by_mode = {
+        "wb": os.O_WRONLY | os.O_CREAT | os.O_TRUNC,
+        "rb": os.O_RDONLY,
+    }
+    flags = flags_by_mode[mode] | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags, 0o600)
+    return os.fdopen(descriptor, mode)
 
 async def dispatch_speech_generation(text_to_speak: str, output_filename: str):
     """Dispatches raw string data into a local text-to-speech rendering layer."""
     try:
-        target_audio_path = os.path.join("/app/workspace", f"{output_filename}.wav")
+        target_audio_path = artifact_audio_path(output_filename)
         
         # Cross-platform fallback: Check if a local python-tts driver is available
         # Otherwise log cleanly to preserve sandbox air-gapping
@@ -24,7 +51,7 @@ async def dispatch_speech_generation(text_to_speak: str, output_filename: str):
         
         # If running inside a container with a text-to-speech engine, this safely synthesizes audio files
         # We write out a clean simulation marker if execution drivers are purely host-driven
-        with open(target_audio_path, "wb") as dummy_wav:
+        with open_audio_file(target_audio_path, "wb") as dummy_wav:
             # Standard minimal 44-byte RIFF/WAVE header to ensure winsound reads a valid structure
             dummy_wav.write(b'RIFF,\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00D\xac\x00\x00D\xac\x00\x00\x01\x00\x08\x00data\x00\x00\x00\x00')
             
@@ -121,12 +148,12 @@ async def evaluate_artifact(request: EvaluationRequest):
                 "execution_trace_log": raw_log
             }
 
-            await dispatch_speech_generation(speech_text=finalized_output["decision_rationale"]["what"], output_filename=request.artifact_name)
+            await dispatch_speech_generation(text_to_speak=finalized_output["decision_rationale"]["what"], output_filename=request.artifact_name)
 
-            target_audio_path = os.path.join("/app/workspace", f"{request.artifact_name}.wav")
+            target_audio_path = artifact_audio_path(request.artifact_name)
             audio_base64 = ""
             if os.path.exists(target_audio_path):
-                with open(target_audio_path, "rb") as audio_file:
+                with open_audio_file(target_audio_path, "rb") as audio_file:
                     audio_base64 = base64.b64encode(audio_file.read()).decode("utf-8")
 
             finalized_output["evaluation_context"]["audio_stream"] = audio_base64
