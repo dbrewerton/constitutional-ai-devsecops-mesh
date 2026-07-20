@@ -19,16 +19,21 @@ The goal is high operational velocity without surrendering safety, accountabilit
 The repository separates constitutional authority, reusable doctrine, architecture decisions, machine-readable policy, implementation, and evidence.
 
 - [Constitution](docs/CONSTITUTION.md) — highest governing engineering charter
+- [Audit Trace Map](docs/AUDIT-TRACE-MAP.md) — auditor-oriented index from control objective to evidence and approval
 - [Architecture Decision Records](docs/ADR/README.md) — permanent record of material architectural decisions
 - [ADR-0001: Canonical Finding Contract](docs/ADR/ADR-0001-Canonical-Finding-Contract.md)
 - [ADR-0002: Human-Centered Collaborative Platform Doctrine](docs/ADR/ADR-0002-Human-Centered-Platform-Doctrine.md) — proposed
+- [ADR-0003: Audit Evidence and Decision Trace Doctrine](docs/ADR/ADR-0003-Audit-Evidence-and-Decision-Trace.md) — proposed
 - [Human-Centered Collaborative Platform Doctrine](docs/doctrine/HUMAN-CENTERED-PLATFORM-DOCTRINE.md) — proposed reusable governance for distributed Human–AI platforms
+- [Audit Evidence and Decision Trace Doctrine](docs/doctrine/AUDIT-EVIDENCE-AND-DECISION-TRACE.md) — proposed reusable governance for evidence, environment separation, and decisional artifacts
 - [Machine-readable Constitution](config/constitution.yaml)
 - [Canonical finding schema](schemas/finding.schema.json)
 
-The Human-Centered Collaborative Platform Doctrine governs reusable principles such as durable data authority, elected operational leadership, offline synchronization, truthful trusted-companion interfaces, language governance, outsourced payment-card boundaries, plugin entitlements, and least-privilege cross-platform packaging.
+The Human-Centered Collaborative Platform Doctrine governs durable data authority, elected operational leadership, offline synchronization, truthful trusted-companion interfaces, language governance, outsourced payment-card boundaries, plugin entitlements, and least-privilege cross-platform packaging.
 
-Product repositories retain their own implementation ADRs, threat models, code, tests, and private data. This governance repository must not become a store for product secrets or client information.
+The Audit Evidence and Decision Trace Doctrine governs the trace from human intent through policy, ADR, implementation, automated evidence, approval, deployment, operational decisions, and retrospective learning. It also defines how distributed timestamps, competing modifications, environment promotion, administrative tooling, fraud indicators, privacy, and static decisional-tree artifacts should be handled.
+
+Product repositories retain their own implementation ADRs, threat models, code, tests, private data, and operational evidence. This governance repository must not become a store for product secrets or client information.
 
 ---
 
@@ -55,6 +60,7 @@ devsecops-stack/
 │   └── constitution.yaml
 ├── docs/
 │   ├── CONSTITUTION.md
+│   ├── AUDIT-TRACE-MAP.md
 │   ├── ADR/
 │   └── doctrine/
 ├── schemas/
