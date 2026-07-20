@@ -37,9 +37,9 @@ Examples:
 
 ADR-0001-Canonical-Finding-Contract.md
 
-ADR-0002-Containerized-Validation.md
+ADR-0002-Human-Centered-Platform-Doctrine.md
 
-ADR-0003-Supervisor-Orchestration.md
+ADR-0003-Audit-Evidence-and-Decision-Trace.md
 
 Numbers are never reused.
 
@@ -72,6 +72,7 @@ Each ADR should contain the following sections:
 |-----|--------|-------------|
 | ADR-0001 | Accepted | Canonical Finding Contract |
 | ADR-0002 | Proposed | Human-Centered Collaborative Platform Doctrine |
+| ADR-0003 | Proposed | Audit Evidence and Decision Trace Doctrine |
 
 ---
 
