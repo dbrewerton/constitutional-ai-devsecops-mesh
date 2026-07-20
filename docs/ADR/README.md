@@ -71,6 +71,7 @@ Each ADR should contain the following sections:
 | ADR | Status | Description |
 |-----|--------|-------------|
 | ADR-0001 | Accepted | Canonical Finding Contract |
+| ADR-0002 | Proposed | Human-Centered Collaborative Platform Doctrine |
 
 ---
 
